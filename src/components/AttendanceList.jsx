@@ -23,25 +23,33 @@ export default function AttendanceList() {
       return;
     }
 
-    const header = ["UID", "Fecha", "Foto URL", "Latitud", "Longitud"];
-    const rows = attendances.map((a) => [
+    const header = ["UID", "Entrada/Salida", "Fecha", "Hora", "Foto URL", "Latitud", "Longitud"];
+
+    const rows = attendances.map((a) => {
+      const date = new Date(a.timestamp.replace(/\.\d+/, ""));
+      const hour = date.getUTCHours();
+      const entradaSalida = hour < 12 ? "Entrada" : "Salida";
+
+      const fecha = date.toLocaleDateString("es-PE", { timeZone: "UTC" });
+      const hora = date.toLocaleTimeString("es-PE", { timeZone: "UTC" });
+
+      return [
       a.user_id,
-      new Date(a.timestamp).toLocaleString("es-PE", {
-        timeZone: "America/Lima",
-        dateStyle: "short",
-        timeStyle: "medium"
-      }),
+      entradaSalida,
+      fecha,
+      hora,
       a.photo_url,
       a.location.lat,
       a.location.lng
-    ]);
+      ];
+    });
 
     const csvContent =
       [header, ...rows]
         .map((row) => row.map((cell) => `"${cell}"`).join(","))
         .join("\n");
-
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const BOM = "\uFEFF";
+    const blob = new Blob([BOM + csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
 
     const link = document.createElement("a");
@@ -69,7 +77,7 @@ export default function AttendanceList() {
         </div>
       </div>
       <div className="table-responsive">
-        <table className="table table-bordered table-striped align-middle">
+        <table className="table table-bordered table-striped table-hover align-middle">
           <thead className="table-dark">
             <tr>
               <th>UID</th>
@@ -90,7 +98,9 @@ export default function AttendanceList() {
                 const hour = date.getUTCHours();
                 const entradaSalida = hour < 12 ? "Entrada" : "Salida";
                 return (
-                  <tr key={a.id}>
+                  <tr key={a.id}
+                    className={hour < 12 ? "table-success" : "table-danger"}
+                    >
                     <td>{a.user_id}</td>
                     <td>{entradaSalida}</td>
                     <td>
