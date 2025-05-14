@@ -29,9 +29,16 @@ export default function AttendanceList() {
               </tr>
             ) : (
               attendances.map((a) => (
+                console.log(a.timestamp),
                 <tr key={a.id}>
                     <td>{a.user_id}</td>
-                    <td>{new Date(a.timestamp).toLocaleString()}</td>
+                    <td>
+                      {new Date(a.timestamp.replace(/\.\d+/, "")).toLocaleString("es-PE", {
+                        timeZone: "UTC",
+                        dateStyle: "short",
+                        timeStyle: "medium"
+                      })}
+                    </td>
                     <td>
                         <img src={a.photo_url} alt="foto" width="100" className="img-thumbnail" />
                     </td>
