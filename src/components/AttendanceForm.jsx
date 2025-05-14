@@ -4,47 +4,65 @@ import { useEffect } from "react";
 
 export default function AttendanceForm() {
     const { currentUser } = useAuth();
-    const [uid, setUid] = useState("");
     const [lat, setLat] = useState(null);
     const [lng, setLng] = useState(null);
     const [image, setImage] = useState(null);
     const [status, setStatus] = useState("");
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         getLocation();
-        setUid(currentUser.email);
     }, []);
     
     const getLocation = () => {
-        navigator.geolocation.getCurrentPosition((position) => {
-        setLat(position.coords.latitude);
-        setLng(position.coords.longitude);
-        });
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                setLat(position.coords.latitude);
+                setLng(position.coords.longitude);
+            },
+            (err) => {
+                console.error("❌ Error obteniendo ubicación:", err);
+                setStatus("🚫 No se pudo obtener tu ubicación.");
+            }
+        );
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        if (!image || !lat || !lng || !currentUser?.email) {
+            setStatus("🚫 Faltan datos. Asegúrate de tener ubicación y foto.");
+            return;
+        }
+
         const formData = new FormData();
-        formData.append("uid", uid);
+        formData.append("uid", currentUser.email);
         formData.append("lat", lat);
         formData.append("lng", lng);
         formData.append("image", image);
 
-        try {
-        const res = await fetch("https://www.api.talentedgeperu.com/attendances/", {
-            method: "POST",
-            body: formData,
-        });
+        console.log("📸 UID:", currentUser.email);
+        console.log("📍 LAT:", lat);
+        console.log("📍 LNG:", lng);
+        console.log("🖼️ IMAGE:", image);
 
-        const data = await res.json();
-        if (res.ok) {
-            setStatus("✅ Asistencia registrada correctamente.");
-        } else {
-            setStatus("❌ Error: " + data.message);
-        }
+        try {
+            setLoading(true);
+            const res = await fetch("https://www.api.talentedgeperu.com/attendances/", {
+                method: "POST",
+                body: formData,
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                setStatus("✅ Asistencia registrada correctamente.");
+            } else {
+                setStatus("❌ Error: " + data.message);
+            }
         } catch (err) {
-        setStatus("🚫 Error de red: " + err.message);
+            setStatus("🚫 Error de red: " + err.message);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -75,8 +93,8 @@ export default function AttendanceForm() {
                     />
                 </div>
             )}
-            <button type="submit" className="btn btn-success">
-            Enviar Asistencia
+            <button type="submit" className="btn btn-success" disabled={loading}>
+                {loading ? "Enviando..." : "Enviar Asistencia"}
             </button>
         </form>
 
