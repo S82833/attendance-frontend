@@ -17,6 +17,41 @@ export default function AttendanceList() {
     return `${degrees}°${String(minutes).padStart(2, '0')}'${String(seconds).padStart(4, '0')}"${direction}`;
   }
 
+  const downloadCSV = () => {
+    if (attendances.length === 0) {
+      alert("No hay datos para exportar.");
+      return;
+    }
+
+    const header = ["UID", "Fecha", "Foto URL", "Latitud", "Longitud"];
+    const rows = attendances.map((a) => [
+      a.user_id,
+      new Date(a.timestamp).toLocaleString("es-PE", {
+        timeZone: "America/Lima",
+        dateStyle: "short",
+        timeStyle: "medium"
+      }),
+      a.photo_url,
+      a.location.lat,
+      a.location.lng
+    ]);
+
+    const csvContent =
+      [header, ...rows]
+        .map((row) => row.map((cell) => `"${cell}"`).join(","))
+        .join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "asistencias.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   useEffect(() => {
     fetch("https://www.api.talentedgeperu.com/attendances/")
       .then((res) => res.json())
@@ -25,7 +60,14 @@ export default function AttendanceList() {
 
   return (
     <div className="card p-4 shadow">
-      <h3 className="mb-4">Asistencias Registradas</h3>
+      <div className="container">
+        <div className="row align-items-start">
+          <h3 className="mb-4 col-9">Asistencias Registradas</h3>
+          <button className="btn btn-primary mb-3 col" onClick={downloadCSV}>
+            Descargar CSV
+          </button>
+        </div>
+      </div>
       <div className="table-responsive">
         <table className="table table-bordered table-striped align-middle">
           <thead className="table-dark">
