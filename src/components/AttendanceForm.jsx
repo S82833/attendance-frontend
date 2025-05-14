@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useAuth } from "../contexts/authContext/index"
 import { useEffect } from "react";
+import imageCompression from "browser-image-compression";
+
 
 export default function AttendanceForm() {
     const { currentUser } = useAuth();
@@ -78,7 +80,25 @@ export default function AttendanceForm() {
                     accept="image/*"
                     capture="user"
                     className="form-control"
-                    onChange={(e) => setImage(e.target.files[0])}
+                    onChange={async (e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                            try {
+                                const options = {
+                                    maxSizeMB: 0.5, 
+                                    maxWidthOrHeight: 800, 
+                                    useWebWorker: true,
+                                };
+
+                                const compressedFile = await imageCompression(file, options);
+                                setImage(compressedFile);
+
+                                console.log("📉 Compressed size (KB):", (compressedFile.size / 1024).toFixed(2));
+                            } catch (err) {
+                                console.error("❌ Error al comprimir la imagen:", err);
+                            }
+                        }
+                    }}
                     required
                 />
             </div>
