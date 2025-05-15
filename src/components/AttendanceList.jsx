@@ -111,7 +111,9 @@ export default function AttendanceList() {
                       })}
                     </td>
                     <td>
-                      <img src={a.photo_url} alt="foto" width="100" className="img-thumbnail" />
+                      <a href={a.photo_url} target="_blank" rel="noopener noreferrer">
+                        <img src={a.photo_url} alt="foto" width="100" className="img-thumbnail" />
+                      </a>
                     </td>
                     <td>
                       <a
