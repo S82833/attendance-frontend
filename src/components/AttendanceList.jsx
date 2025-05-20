@@ -28,14 +28,13 @@ export default function AttendanceList() {
     const rows = attendances.map((a) => {
       const date = new Date(a.timestamp.replace(/\.\d+/, ""));
       const hour = date.getUTCHours();
-      const entradaSalida = hour < 12 ? "Entrada" : "Salida";
 
       const fecha = date.toLocaleDateString("es-PE", { timeZone: "UTC" });
       const hora = date.toLocaleTimeString("es-PE", { timeZone: "UTC" });
 
       return [
       a.user_id,
-      entradaSalida,
+      a.entradaSalida,
       fecha,
       hora,
       a.photo_url,
@@ -95,11 +94,10 @@ export default function AttendanceList() {
             ) : (
               attendances.map((a) => {
                 const date = new Date(a.timestamp.replace(/\.\d+/, ""));
-                const hour = date.getUTCHours();
-                const entradaSalida = hour < 12 ? "Entrada" : "Salida";
+                const entradaSalida = a.entradaSalida;
                 return (
                   <tr key={a.id}
-                    className={hour < 12 ? "table-success" : "table-danger"}
+                    className={entradaSalida === "Entrada" ? "table-success" : "table-danger"}
                     >
                     <td>{a.user_id}</td>
                     <td>{entradaSalida}</td>
