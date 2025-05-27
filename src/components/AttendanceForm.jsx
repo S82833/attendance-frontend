@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAuth } from "../contexts/authContext/index"
 import { useEffect } from "react";
 import imageCompression from "browser-image-compression";
+import { useSearchParams } from "react-router-dom";
 
 
 export default function AttendanceForm() {
@@ -12,10 +13,19 @@ export default function AttendanceForm() {
     const [status, setStatus] = useState("");
     const [loading, setLoading] = useState(false);
     const [entradaSalida, setEntradaSalida] = useState(null);
+    const [searchParams] = useSearchParams();
 
     useEffect(() => {
         getLocation();
     }, []);
+    
+    useEffect(() => {
+        const opcion = searchParams.get('opcion');
+        if (opcion === 'Entrada' || opcion === 'Salida'){
+            setEntradaSalida(opcion);
+        }
+    }, [searchParams])
+
     
     const getLocation = () => {
         navigator.geolocation.getCurrentPosition(
@@ -110,7 +120,8 @@ export default function AttendanceForm() {
                             type="radio"
                             name="grupoOpciones"
                             id="entradaCheck"
-                            onChange={(e) => setEntradaSalida(e.target.checked ? "Entrada" : null)}
+                            checked={entradaSalida === 'Entrada'}
+                            onChange={(e) => setEntradaSalida('Entrada')}
                         />
                         <label className="form-check-label mb-0 me-5" htmlFor="entradaCheck">Entrada</label>
                         <input
@@ -118,7 +129,8 @@ export default function AttendanceForm() {
                             type="radio"
                             name="grupoOpciones"
                             id="salidaCheck"
-                            onChange={(e) => setEntradaSalida(e.target.checked ? "Salida" : null)}
+                            checked={entradaSalida === 'Salida'}
+                            onChange={(e) => setEntradaSalida('Salida')}
                         />
                         <label className="form-check-label mb-0" htmlFor="salidaCheck">Salida</label>
                     </div>
