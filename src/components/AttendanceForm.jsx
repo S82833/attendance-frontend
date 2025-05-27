@@ -11,7 +11,7 @@ export default function AttendanceForm() {
     const [image, setImage] = useState(null);
     const [status, setStatus] = useState("");
     const [loading, setLoading] = useState(false);
-    const [entradaSalida, setEntradaSalida] = useState("Entrada");
+    const [entradaSalida, setEntradaSalida] = useState(null);
 
     useEffect(() => {
         getLocation();
@@ -34,7 +34,7 @@ export default function AttendanceForm() {
         e.preventDefault();
 
         if (!image || !lat || !lng || !currentUser?.email || !entradaSalida) {
-            setStatus("🚫 Faltan datos. Asegúrate de tener ubicación y foto.");
+            setStatus("🚫 Faltan datos.");
             return;
         }
 
@@ -73,11 +73,11 @@ export default function AttendanceForm() {
 
 
     return (
-        <div className="card p-4 mb-4 shadow">
+        <div className="card p-4 mb-4 shadow container">
             <h3 className="mb-3">Registrar Asistencia</h3>
             <form onSubmit={handleSubmit}>
                 <div className="mb-3">
-                    <label className="form-label">Foto (JPEG/PNG)</label>
+                    <label className="form-label">Foto</label>
                     <input
                         type="file"
                         accept="image/*"
@@ -107,11 +107,20 @@ export default function AttendanceForm() {
                     <div className="form-check mt-3 d-flex align-items-center">
                         <input 
                             className="form-check-input me-2"
-                            type="checkbox"
-                            id="entradaSalidaCheck"
-                            onChange={(e) => setEntradaSalida(e.target.checked ? "Salida" : "Entrada")}
+                            type="radio"
+                            name="grupoOpciones"
+                            id="entradaCheck"
+                            onChange={(e) => setEntradaSalida(e.target.checked ? "Entrada" : null)}
                         />
-                        <label className="form-check-label mb-0" htmlFor="entradaSalidaCheck">Salida</label>
+                        <label className="form-check-label mb-0 me-5" htmlFor="entradaCheck">Entrada</label>
+                        <input
+                            className="form-check-input me-2"
+                            type="radio"
+                            name="grupoOpciones"
+                            id="salidaCheck"
+                            onChange={(e) => setEntradaSalida(e.target.checked ? "Salida" : null)}
+                        />
+                        <label className="form-check-label mb-0" htmlFor="salidaCheck">Salida</label>
                     </div>
                 </div>
 
