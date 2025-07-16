@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-
+import { useAuth } from "../contexts/authContext/index"
 export default function AttendanceList() {
   const [attendances, setAttendances] = useState([]);
 
@@ -59,11 +59,30 @@ export default function AttendanceList() {
     document.body.removeChild(link);
   };
 
+  const { currentUser } = useAuth();
   useEffect(() => {
+    if (!currentUser || !currentUser.email) return;
+
+    const allowedDomain = currentUser.email.split("@")[1]; // ejemplo: talentedgeperu.com
+
     fetch("https://www.api.talentedgeperu.com/attendances/")
       .then((res) => res.json())
-      .then((data) => setAttendances(data.attendances || []));
-  }, []);
+      .then((data) => {
+        const all = data.attendances || [];
+
+        // solo mantener los registros que tienen ese dominio
+        const filtered = all.filter((a) => {
+          const userDomain = a.user_id?.split("@")[1];
+          return userDomain === allowedDomain;
+        });
+
+        setAttendances(filtered);
+      })
+      .catch((err) => {
+        console.error("Error al obtener asistencias:", err);
+      });
+  }, [currentUser]);
+
 
   return (
     <div className="card p-4 shadow">
